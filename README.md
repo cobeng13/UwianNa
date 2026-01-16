@@ -11,6 +11,15 @@ npm run dev
 
 ## Tauri desktop (Windows EXE)
 
+Tauri requires the Rust toolchain (cargo). Install it first:
+
+```bash
+# Windows PowerShell
+winget install Rustlang.Rustup
+```
+
+Then run:
+
 ```bash
 npm install
 npm run tauri
