@@ -104,17 +104,6 @@ const App = () => {
     }
   }, [remainingNames.length, autoDrawEnabled]);
 
-  useEffect(() => {
-    if (!autoDrawEnabled || !nextDrawAt) return;
-    const timer = window.setInterval(() => {
-      if (Date.now() >= nextDrawAt) {
-        handleDraw();
-        setNextDrawAt(Date.now() + autoDrawIntervalSec * 1000);
-      }
-    }, 250);
-    return () => window.clearInterval(timer);
-  }, [autoDrawEnabled, nextDrawAt, autoDrawIntervalSec, handleDraw]);
-
   const nextRound = roundCounter + 1;
 
   const availableRigNames = useMemo(
@@ -180,6 +169,17 @@ const App = () => {
     setRoundCounter(round);
     setWinner(newHistory);
   }, [remainingNames, roundCounter, rigEnabled, rigRules, addToast]);
+
+  useEffect(() => {
+    if (!autoDrawEnabled || !nextDrawAt) return;
+    const timer = window.setInterval(() => {
+      if (Date.now() >= nextDrawAt) {
+        handleDraw();
+        setNextDrawAt(Date.now() + autoDrawIntervalSec * 1000);
+      }
+    }, 250);
+    return () => window.clearInterval(timer);
+  }, [autoDrawEnabled, nextDrawAt, autoDrawIntervalSec, handleDraw]);
 
   const handleUndo = useCallback(() => {
     if (history.length === 0) return;
