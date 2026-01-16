@@ -28,8 +28,6 @@ npm run tauri:build
 
 The Windows `.exe` will be created by the Tauri build process in `src-tauri/target/release/bundle`.
 
-> Note: Tauri icon files are intentionally not committed; add them manually later.
-
 ## How to unlock Rig Mode
 
 Click the **Lucky Draw** title 7 times within 4 seconds to open the hidden Rig Mode modal.
