@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import TopBar from "./components/TopBar";
 import NameInput from "./components/NameInput";
-import WinnerCard from "./components/WinnerCard";
+import WinnerCard, { slotDurationMs } from "./components/WinnerCard";
 import History from "./components/History";
 import RemainingList from "./components/RemainingList";
 import AutoDraw from "./components/AutoDraw";
@@ -48,8 +48,10 @@ const App = () => {
 
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [rigToastVisible, setRigToastVisible] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(false);
 
   const titleClickTimes = useRef<number[]>([]);
+  const pendingHistoryTimers = useRef<number[]>([]);
 
   useEffect(() => {
     const stored = loadState();
@@ -63,6 +65,7 @@ const App = () => {
     setAutoDrawEnabled(stored.autoDrawEnabled);
     setAutoDrawIntervalSec(stored.autoDrawIntervalSec || defaultInterval);
     setWinner(stored.history[0] ?? null);
+    setSoundEnabled(stored.soundEnabled ?? false);
     if (stored.originalNames.length > 0) {
       setInputText(stored.originalNames.join("\n"));
     }
@@ -77,7 +80,8 @@ const App = () => {
       rigRules,
       rigEnabled,
       autoDrawEnabled,
-      autoDrawIntervalSec
+      autoDrawIntervalSec,
+      soundEnabled
     });
   }, [
     originalNames,
@@ -87,7 +91,8 @@ const App = () => {
     rigRules,
     rigEnabled,
     autoDrawEnabled,
-    autoDrawIntervalSec
+    autoDrawIntervalSec,
+    soundEnabled
   ]);
 
   useEffect(() => {
@@ -116,8 +121,14 @@ const App = () => {
     setToasts((prev) => [...prev, { id, message }]);
   }, []);
 
+  const clearPendingHistory = useCallback(() => {
+    pendingHistoryTimers.current.forEach((timer) => window.clearTimeout(timer));
+    pendingHistoryTimers.current = [];
+  }, []);
+
   const handleApply = useCallback(() => {
     const parsed = parseNames(inputText);
+    clearPendingHistory();
     setOriginalNames(parsed);
     setRemainingNames(parsed);
     setHistory([]);
@@ -125,7 +136,7 @@ const App = () => {
     setWinner(null);
     setAutoDrawEnabled(false);
     setRigRules((prev) => prev.map((rule) => ({ ...rule, used: false })));
-  }, [inputText]);
+  }, [inputText, clearPendingHistory]);
 
   const handleDraw = useCallback(() => {
     if (remainingNames.length === 0) {
@@ -165,10 +176,19 @@ const App = () => {
       if (index < 0) return prev;
       return [...prev.slice(0, index), ...prev.slice(index + 1)];
     });
-    setHistory((prev) => [newHistory, ...prev]);
+    const historyTimer = window.setTimeout(() => {
+      setHistory((prev) => [newHistory, ...prev]);
+    }, slotDurationMs);
+    pendingHistoryTimers.current.push(historyTimer);
     setRoundCounter(round);
     setWinner(newHistory);
   }, [remainingNames, roundCounter, rigEnabled, rigRules, addToast]);
+
+  useEffect(() => {
+    return () => {
+      clearPendingHistory();
+    };
+  }, [clearPendingHistory]);
 
   useEffect(() => {
     if (!autoDrawEnabled || !nextDrawAt) return;
@@ -274,6 +294,16 @@ const App = () => {
                     Draws are unique until Undo.
                   </span>
                   <button
+                    onClick={() => setSoundEnabled((prev) => !prev)}
+                    className={`rounded-full border px-3 py-1 text-xs uppercase tracking-[0.2em] transition ${
+                      soundEnabled
+                        ? "border-neon-pink/70 text-neon-pink shadow-neon-pink"
+                        : "border-white/20 text-white/60"
+                    }`}
+                  >
+                    Sound: {soundEnabled ? "On" : "Off"}
+                  </button>
+                  <button
                     onClick={handleClearStorage}
                     className="rounded-full border border-white/20 px-3 py-1 text-xs uppercase tracking-[0.2em] transition hover:border-neon-cyan/70 hover:text-neon-cyan"
                   >
@@ -291,6 +321,7 @@ const App = () => {
               winner={winner}
               namesPool={originalNames}
               remainingNames={remainingNames}
+              soundEnabled={soundEnabled}
             />
             <History items={history} />
           </div>

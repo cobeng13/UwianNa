@@ -1,18 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { HistoryItem } from "../App";
 
-const slotDuration = 800;
+export const slotDurationMs = 800;
 
 type WinnerCardProps = {
   winner: HistoryItem | null;
   namesPool: string[];
   remainingNames: string[];
+  soundEnabled: boolean;
 };
 
-const WinnerCard = ({ winner, namesPool, remainingNames }: WinnerCardProps) => {
+const WinnerCard = ({ winner, namesPool, remainingNames, soundEnabled }: WinnerCardProps) => {
   const [displayName, setDisplayName] = useState<string>("Ready to draw");
   const [isRevealing, setIsRevealing] = useState(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   const slotNames = useMemo(() => {
     const pool = remainingNames.length > 0 ? remainingNames : namesPool;
@@ -26,25 +28,47 @@ const WinnerCard = ({ winner, namesPool, remainingNames }: WinnerCardProps) => {
       return;
     }
 
+    const playTone = (frequency: number, duration: number, gainValue: number) => {
+      if (!soundEnabled) return;
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContext();
+      }
+      if (audioContextRef.current.state === "suspended") {
+        audioContextRef.current.resume();
+      }
+      const context = audioContextRef.current;
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = "square";
+      oscillator.frequency.value = frequency;
+      gain.gain.value = gainValue;
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start();
+      oscillator.stop(context.currentTime + duration / 1000);
+    };
+
     let frame = 0;
     setIsRevealing(true);
     const interval = window.setInterval(() => {
       frame += 1;
       const pick = slotNames[frame % slotNames.length];
       setDisplayName(pick);
+      playTone(540, 60, 0.08);
     }, 80);
 
     const timeout = window.setTimeout(() => {
       window.clearInterval(interval);
       setDisplayName(winner.name);
       setIsRevealing(false);
-    }, slotDuration);
+      playTone(920, 180, 0.12);
+    }, slotDurationMs);
 
     return () => {
       window.clearInterval(interval);
       window.clearTimeout(timeout);
     };
-  }, [winner, slotNames]);
+  }, [winner, slotNames, soundEnabled]);
 
   return (
     <section className="glass-panel relative overflow-hidden rounded-3xl p-6">

@@ -13,6 +13,7 @@ type StoredState = {
   rigEnabled: boolean;
   autoDrawEnabled: boolean;
   autoDrawIntervalSec: number;
+  soundEnabled: boolean;
 };
 
 const STORAGE_KEY = "lucky-draw-state";

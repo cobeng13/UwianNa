@@ -1,10 +1,5 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-
-const formatCountdown = (nextDrawAt: number | null) => {
-  if (!nextDrawAt) return "--";
-  const diff = Math.max(0, nextDrawAt - Date.now());
-  return Math.ceil(diff / 1000);
-};
 
 type AutoDrawProps = {
   enabled: boolean;
@@ -15,6 +10,15 @@ type AutoDrawProps = {
 };
 
 const AutoDraw = ({ enabled, intervalSec, onToggle, onIntervalChange, nextDrawAt }: AutoDrawProps) => {
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    if (!enabled || !nextDrawAt) return;
+    const timer = window.setInterval(() => setNow(Date.now()), 200);
+    return () => window.clearInterval(timer);
+  }, [enabled, nextDrawAt]);
+
+  const remainingSeconds = nextDrawAt ? Math.max(0, Math.ceil((nextDrawAt - now) / 1000)) : "--";
   return (
     <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -51,7 +55,7 @@ const AutoDraw = ({ enabled, intervalSec, onToggle, onIntervalChange, nextDrawAt
           animate={{ opacity: 1 }}
           className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/60"
         >
-          Next draw in: {formatCountdown(nextDrawAt)}s
+          Next draw in: {remainingSeconds}s
         </motion.div>
       </div>
     </div>
