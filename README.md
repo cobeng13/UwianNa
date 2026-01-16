@@ -13,11 +13,13 @@ npm run dev
 
 ```bash
 npm install
-npm run tauri dev
-npm run tauri build
+npm run tauri
+npm run tauri:build
 ```
 
 The Windows `.exe` will be created by the Tauri build process in `src-tauri/target/release/bundle`.
+
+> Note: Tauri icon files are intentionally not committed; add them manually later.
 
 ## How to unlock Rig Mode
 
