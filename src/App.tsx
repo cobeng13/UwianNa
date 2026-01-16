@@ -8,7 +8,8 @@ import RemainingList from "./components/RemainingList";
 import AutoDraw from "./components/AutoDraw";
 import RigModal from "./components/RigModal";
 import Toast, { ToastMessage } from "./components/Toast";
-import { getRandomIndex, RandomnessType } from "./utils/random";
+import { getRandomIndex } from "./utils/random";
+import type { RandomnessType } from "./utils/random";
 import { clearState, loadState, saveState } from "./utils/storage";
 
 export type HistoryItem = { round: number; name: string; timestamp: number };

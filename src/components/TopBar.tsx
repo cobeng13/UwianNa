@@ -1,4 +1,4 @@
-import { RandomnessType } from "../utils/random";
+import type { RandomnessType } from "../utils/random";
 
 type TopBarProps = {
   remaining: number;
