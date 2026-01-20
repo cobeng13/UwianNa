@@ -208,6 +208,13 @@ const App = () => {
     setRemainingNames((prev) => [...prev, latest.name]);
     setRoundCounter((prev) => Math.max(prev - 1, 0));
     setWinner(rest[0] ?? null);
+    setRigRules((prev) =>
+      prev.map((rule) =>
+        rule.used && rule.round === latest.round && rule.name === latest.name
+          ? { ...rule, used: false }
+          : rule
+      )
+    );
   }, [history]);
 
   const handleReset = useCallback(() => {
