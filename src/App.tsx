@@ -163,9 +163,19 @@ const App = () => {
     }
 
     if (!selectedName) {
-      const { index, type } = getRandomIndex(remainingNames.length);
+      const protectedNames = rigEnabled
+        ? rigRules
+            .filter((rule) => rule.enabled && !rule.used && rule.round > round)
+            .map((rule) => rule.name)
+        : [];
+      const availableNames =
+        protectedNames.length > 0
+          ? remainingNames.filter((name) => !protectedNames.includes(name))
+          : remainingNames;
+      const pool = availableNames.length > 0 ? availableNames : remainingNames;
+      const { index, type } = getRandomIndex(pool.length);
       setRandomnessType(type);
-      selectedName = remainingNames[index];
+      selectedName = pool[index];
     }
 
     const timestamp = Date.now();
