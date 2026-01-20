@@ -25,10 +25,14 @@ const RigModal = ({
 }: RigModalProps) => {
   const [selectedName, setSelectedName] = useState("");
   const [round, setRound] = useState(nextRound);
+  const [roundDirty, setRoundDirty] = useState(false);
 
   useEffect(() => {
-    setRound(nextRound);
-  }, [nextRound]);
+    if (!open) return;
+    if (!roundDirty) {
+      setRound(nextRound);
+    }
+  }, [nextRound, open, roundDirty]);
 
   useEffect(() => {
     if (!open) return;
@@ -40,10 +44,13 @@ const RigModal = ({
   }, [open, onClose]);
 
   useEffect(() => {
+    if (!open) return;
+    setRoundDirty(false);
+    setRound(nextRound);
     if (names.length > 0) {
       setSelectedName((prev) => prev || names[0]);
     }
-  }, [names]);
+  }, [open, nextRound, names]);
 
   const canSave = selectedName.length > 0 && round >= 1;
 
@@ -58,6 +65,8 @@ const RigModal = ({
       used: false
     };
     setRigRules([newRule, ...rigRules]);
+    setRoundDirty(false);
+    setRound(nextRound);
   };
 
   const sortedRules = useMemo(() => [...rigRules].sort((a, b) => a.round - b.round), [rigRules]);
@@ -129,7 +138,10 @@ const RigModal = ({
                     type="number"
                     min={1}
                     value={round}
-                    onChange={(event) => setRound(Math.max(1, Number(event.target.value)))}
+                    onChange={(event) => {
+                      setRoundDirty(true);
+                      setRound(Math.max(1, Number(event.target.value)));
+                    }}
                     className="focus-outline w-32 rounded-lg border border-white/10 bg-black/40 px-3 py-2"
                   />
                 </label>

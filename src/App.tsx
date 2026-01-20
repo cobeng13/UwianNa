@@ -163,9 +163,19 @@ const App = () => {
     }
 
     if (!selectedName) {
-      const { index, type } = getRandomIndex(remainingNames.length);
+      const protectedNames = rigEnabled
+        ? rigRules
+            .filter((rule) => rule.enabled && !rule.used && rule.round > round)
+            .map((rule) => rule.name)
+        : [];
+      const availableNames =
+        protectedNames.length > 0
+          ? remainingNames.filter((name) => !protectedNames.includes(name))
+          : remainingNames;
+      const pool = availableNames.length > 0 ? availableNames : remainingNames;
+      const { index, type } = getRandomIndex(pool.length);
       setRandomnessType(type);
-      selectedName = remainingNames[index];
+      selectedName = pool[index];
     }
 
     const timestamp = Date.now();
@@ -208,6 +218,13 @@ const App = () => {
     setRemainingNames((prev) => [...prev, latest.name]);
     setRoundCounter((prev) => Math.max(prev - 1, 0));
     setWinner(rest[0] ?? null);
+    setRigRules((prev) =>
+      prev.map((rule) =>
+        rule.used && rule.round === latest.round && rule.name === latest.name
+          ? { ...rule, used: false }
+          : rule
+      )
+    );
   }, [history]);
 
   const handleReset = useCallback(() => {
