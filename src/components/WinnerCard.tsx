@@ -13,6 +13,7 @@ type WinnerCardProps = {
 
 const WinnerCard = ({ winner, namesPool, remainingNames, soundEnabled }: WinnerCardProps) => {
   const [displayName, setDisplayName] = useState<string>("Ready to draw");
+  const [displayNames, setDisplayNames] = useState<string[]>(["Ready to draw"]);
   const [isRevealing, setIsRevealing] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
 
@@ -24,6 +25,7 @@ const WinnerCard = ({ winner, namesPool, remainingNames, soundEnabled }: WinnerC
   useEffect(() => {
     if (!winner) {
       setDisplayName("Ready to draw");
+      setDisplayNames(["Ready to draw"]);
       setIsRevealing(false);
       return;
     }
@@ -59,7 +61,7 @@ const WinnerCard = ({ winner, namesPool, remainingNames, soundEnabled }: WinnerC
 
     const timeout = window.setTimeout(() => {
       window.clearInterval(interval);
-      setDisplayName(winner.name);
+      setDisplayNames(winner.names);
       setIsRevealing(false);
       playTone(920, 180, 0.12);
     }, slotDurationMs);
@@ -97,8 +99,24 @@ const WinnerCard = ({ winner, namesPool, remainingNames, soundEnabled }: WinnerC
             className="font-display text-3xl uppercase tracking-[0.2em] text-white"
             animate={isRevealing ? { textShadow: "0 0 18px rgba(255,79,216,0.7)" } : {}}
           >
-            {displayName}
+            {isRevealing || !winner
+              ? displayName
+              : displayNames.length > 1
+                ? "Group Winners"
+                : displayNames[0]}
           </motion.p>
+          {!isRevealing && winner && displayNames.length > 1 && (
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              {displayNames.map((name) => (
+                <span
+                  key={name}
+                  className="rounded-full border border-neon-purple/40 bg-black/50 px-3 py-1 text-xs uppercase tracking-[0.25em] text-white/80"
+                >
+                  {name}
+                </span>
+              ))}
+            </div>
+          )}
           <p className="mt-3 text-xs uppercase tracking-[0.25em] text-white/50">
             {winner ? new Date(winner.timestamp).toLocaleTimeString() : "Awaiting draw"}
           </p>

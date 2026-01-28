@@ -41,9 +41,23 @@ const History = ({ items }: HistoryProps) => {
               className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3"
             >
               <div className="flex items-center justify-between">
-                <p className="font-display text-lg text-neon-pink">{item.name}</p>
+                <p className="font-display text-lg text-neon-pink">
+                  {item.names.join(", ")}
+                </p>
                 <span className="text-xs text-white/50">Round {item.round}</span>
               </div>
+              {item.names.length > 1 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {item.names.map((name) => (
+                    <span
+                      key={`${item.timestamp}-${name}`}
+                      className="rounded-full border border-white/15 bg-black/40 px-2 py-0.5 text-xs uppercase tracking-[0.2em] text-white/60"
+                    >
+                      {name}
+                    </span>
+                  ))}
+                </div>
+              )}
               <p className="text-xs text-white/40">
                 {new Date(item.timestamp).toLocaleTimeString()}
               </p>
