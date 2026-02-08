@@ -1,7 +1,10 @@
 type StoredState = {
   originalNames: string[];
   remainingNames: string[];
-  history: { round: number; name: string; timestamp: number }[];
+  history: (
+    | { round: number; name: string; timestamp: number }
+    | { round: number; names: string[]; timestamp: number; groupSize?: number }
+  )[];
   roundCounter: number;
   rigRules: {
     id: string;
@@ -14,6 +17,10 @@ type StoredState = {
   autoDrawEnabled: boolean;
   autoDrawIntervalSec: number;
   soundEnabled: boolean;
+  groupDrawEnabled?: boolean;
+  groupSizeInitial?: number;
+  groupSizeCurrent?: number;
+  decreaseGroupSize?: boolean;
 };
 
 const STORAGE_KEY = "lucky-draw-state";
