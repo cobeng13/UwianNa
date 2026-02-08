@@ -216,17 +216,17 @@ const App = () => {
 
     if (selectedNames.length < groupSizeForDraw) {
       let pool = remainingNames.filter((name) => !selectedNames.includes(name));
-      if (!groupDrawEnabled) {
-        const protectedNames = rigEnabled
-          ? rigRules
-              .filter((rule) => rule.enabled && !rule.used && rule.round > round)
-              .map((rule) => rule.name)
-          : [];
-        const availableNames =
-          protectedNames.length > 0
-            ? pool.filter((name) => !protectedNames.includes(name))
-            : pool;
-        pool = availableNames.length > 0 ? availableNames : pool;
+      const remainingSlots = groupSizeForDraw - selectedNames.length;
+      const protectedNames = rigEnabled
+        ? rigRules
+            .filter((rule) => rule.enabled && !rule.used && rule.round > round)
+            .map((rule) => rule.name)
+        : [];
+      if (protectedNames.length > 0) {
+        const availableNames = pool.filter((name) => !protectedNames.includes(name));
+        if (availableNames.length >= remainingSlots) {
+          pool = availableNames;
+        }
       }
       while (selectedNames.length < groupSizeForDraw && pool.length > 0) {
         const { index, type } = getRandomIndex(pool.length);
